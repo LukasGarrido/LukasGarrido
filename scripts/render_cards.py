@@ -15,9 +15,9 @@ ROOT = Path(__file__).resolve().parent.parent
 CARDS = ROOT / "cards"
 USER = "LukasGarrido"
 
-BG, SURFACE, BORDER = "#08090a", "#111315", "#23272d"
-TEXT, MUTED, DIM = "#f1f5f9", "#94a3b8", "#64748b"
-INDIGO, CYAN, EMERALD, RED = "#6366f1", "#06b6d4", "#10b981", "#ef4444"
+BG, SURFACE, BORDER = "#0a0809", "#131112", "#2a2526"
+TEXT, MUTED, DIM = "#f4f4f5", "#a1a1aa", "#71717a"
+CRIMSON, CORAL, ROSE, RED = "#dc2626", "#f87171", "#fb7185", "#ef4444"
 
 SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Helvetica,Arial,sans-serif"
 MONO = "ui-monospace,'JetBrains Mono',SFMono-Regular,Consolas,Menlo,monospace"
@@ -72,26 +72,26 @@ def glow(gid, cx, cy, r, color, opacity=0.22):
 
 
 def hero():
-    b = glow("g1", 690, 200, 300, RED) + glow("g2", 60, 20, 320, INDIGO)
+    b = glow("g1", 690, 200, 300, RED) + glow("g2", 60, 20, 320, CRIMSON)
     b += anim("fade", .1,
-              f'<rect class="pulse" x="40" y="62" width="9" height="9" fill="{CYAN}"/>'
+              f'<rect class="pulse" x="40" y="62" width="9" height="9" fill="{CORAL}"/>'
               + text(60, 71, "INGENIERÍA INFORMÁTICA · USM CONCEPCIÓN", 12, MUTED, "m",
                      'letter-spacing="1.2"'))
     # nombre con un brillo que recorre el degradado
     b += (f'<linearGradient id="name" gradientUnits="userSpaceOnUse" x1="0" x2="520" spreadMethod="repeat">'
-          f'<stop offset="0" stop-color="{INDIGO}"/><stop offset=".5" stop-color="{CYAN}"/>'
-          f'<stop offset="1" stop-color="{INDIGO}"/>'
+          f'<stop offset="0" stop-color="{CRIMSON}"/><stop offset=".5" stop-color="{CORAL}"/>'
+          f'<stop offset="1" stop-color="{CRIMSON}"/>'
           '<animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="520 0" '
           'dur="7s" repeatCount="indefinite"/></linearGradient>')
     heavy = 'font-weight="800" letter-spacing="-3"'
     b += anim("rise", .2, text(36, 164, "Lukas", 92, TEXT, "s", heavy))
     b += anim("rise", .32, text(36, 254, "Garrido", 92, "url(#name)", "s", heavy))
     b += anim("rise", .5,
-              text(40, 300, "Desarrollo backend, APIs y análisis de datos.", 18, "#cbd5e1")
+              text(40, 300, "Ciencia de datos y desarrollo de software.", 18, "#d4d4d8")
               + text(40, 326, "Los Ángeles – Concepción, Chile", 15, DIM))
     b += anim("fade", .8,
               text(40, 376, "lukasgarrido-portfolio.vercel.app", 13, TEXT, "m")
-              + f'<g class="nudge">{text(310, 376, "→", 15, CYAN, "m")}</g>')
+              + f'<g class="nudge">{text(310, 376, "→", 15, CORAL, "m")}</g>')
 
     rows = json.loads((ROOT / "data" / "portrait.json").read_text(encoding="utf-8"))
     cols = len("".join(t for _, t in rows[0]))
@@ -103,21 +103,21 @@ def hero():
                   f'xml:space="preserve" textLength="{width}" lengthAdjust="spacingAndGlyphs" '
                   f'data-cols="{cols}">{spans}</text>')
     save("hero", 880, 408,
-         "Lukas Garrido, estudiante de Ingeniería Informática. Backend, APIs y análisis de datos.", b)
+         "Lukas Garrido, estudiante de Ingeniería Informática. Ciencia de datos y desarrollo.", b)
 
 
 def pillar(name, x_label, big, unit, lines, color, delay):
-    w, h = 293.333, 212
-    b = glow("g", 250, 190, 170, color, .35)
-    b += f'<rect x="4" y="4" width="286" height="3" fill="{color}"/>'
+    w, h = 440, 212
+    b = glow("g", 390, 190, 220, color, .35)
+    b += f'<rect x="4" y="4" width="432" height="3" fill="{color}"/>'
     b += (f'<g class="sheen"><path d="M0 0H60L-10 212H-70Z" fill="#fff" opacity=".05"/></g>')
     b += text(24, 40, x_label, 12, color, "m", 'letter-spacing="1.4"')
-    b += f'<g class="nudge">{text(252, 40, "→", 15, color, "m")}</g>'
+    b += f'<g class="nudge">{text(398, 40, "→", 15, color, "m")}</g>'
     b += anim("rise", delay,
               f'<text x="22" y="100" class="s" fill="{TEXT}"><tspan font-size="44" font-weight="800">{escape(big)}</tspan>'
               f'<tspan font-size="17" fill="{MUTED}" dx="8">{escape(unit)}</tspan></text>')
     for i, row in enumerate(lines):
-        b += anim("rise", delay + .15 + i * .08, text(24, 138 + i * 22, row, 13.5, "#cbd5e1"))
+        b += anim("rise", delay + .15 + i * .08, text(24, 138 + i * 22, row, 13.5, "#d4d4d8"))
     save(name, w, h, f"{x_label}: {big} {unit}. {' '.join(lines)}", b, SURFACE)
 
 
@@ -129,16 +129,16 @@ def section_title(name, label, color):
 
 def stack():
     groups = [
-        ("BACKEND", ["Python", "FastAPI", "Laravel", "MySQL", "PostgreSQL"], INDIGO),
-        ("DATOS", ["Jupyter", "Pandas", "NumPy", "Streamlit"], CYAN),
-        ("WEB", ["Astro", "Tailwind CSS", "TypeScript", "JavaScript", "Bootstrap"], EMERALD),
+        ("BACKEND", ["Python", "FastAPI", "Laravel", "MySQL", "PostgreSQL"], CRIMSON),
+        ("CIENCIA DE DATOS", ["Jupyter", "Pandas", "NumPy", "Streamlit"], CORAL),
+        ("WEB", ["Astro", "Tailwind CSS", "TypeScript"], ROSE),
         ("TOOLS", ["Docker", "Git", "GitHub", "GitLab", "Postman"], RED),
     ]
     b, n = "", 0
     for row, (label, items, color) in enumerate(groups):
         y = 28 + row * 48
         b += text(32, y + 20, label, 12, color, "m", 'letter-spacing="1.4"')
-        x = 150
+        x = 200
         for item in items:
             w = len(item) * 8 + 36
             b += anim("rise", .1 + n * .04,
@@ -167,8 +167,8 @@ def fetch_calendar(token):
 
 
 def heatmap(calendar):
-    colors = {"NONE": "#16191d", "FIRST_QUARTILE": "#1e2a5e", "SECOND_QUARTILE": "#3b3fa8",
-              "THIRD_QUARTILE": "#6366f1", "FOURTH_QUARTILE": "#22d3ee"}
+    colors = {"NONE": "#1c191a", "FIRST_QUARTILE": "#4c1519", "SECOND_QUARTILE": "#8f1d1d",
+              "THIRD_QUARTILE": "#dc2626", "FOURTH_QUARTILE": "#ff6b6b"}
     total = calendar["totalContributions"]
     b = text(32, 40, f"{total} contribuciones en el último año", 15, TEXT, "s", 'font-weight="700"')
     weeks = calendar["weeks"][-53:]
@@ -204,9 +204,9 @@ def activity(calendar):
     active = sum(1 for d in days if d["contributionCount"])
     best_date = dt.date.fromisoformat(best["date"])
     stats = [
-        (active, "días activos", INDIGO),
-        (longest, "días de racha máxima", CYAN),
-        (best["contributionCount"], f"mejor día · {best_date.day} {MONTHS[best_date.month - 1]}", EMERALD),
+        (active, "días activos", CRIMSON),
+        (longest, "días de racha máxima", CORAL),
+        (best["contributionCount"], f"mejor día · {best_date.day} {MONTHS[best_date.month - 1]}", ROSE),
     ]
     b = ""
     for i, (value, label, color) in enumerate(stats):
@@ -221,8 +221,8 @@ def activity(calendar):
               f'width="34" height="{h:.1f}" rx="5" fill="url(#bar)"/>')
         b += text(x + 17, f"{170 - h:.1f}", value, 11, MUTED, "m", 'text-anchor="middle"')
         b += text(x + 17, 202, MONTHS[int(key[5:]) - 1], 11, DIM, "m", 'text-anchor="middle"')
-    b = (f'<linearGradient id="bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{CYAN}"/>'
-         f'<stop offset="1" stop-color="{INDIGO}"/></linearGradient>') + b
+    b = (f'<linearGradient id="bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{CORAL}"/>'
+         f'<stop offset="1" stop-color="{CRIMSON}"/></linearGradient>') + b
     save("activity", 880, 224,
          f"Actividad mensual: {active} días activos, racha máxima de {longest} días", b)
 
@@ -230,13 +230,11 @@ def activity(calendar):
 def main():
     CARDS.mkdir(exist_ok=True)
     hero()
-    pillar("backend", "BACKEND", "APIs", "REST", ["FastAPI y Laravel sobre", "MySQL y PostgreSQL, con",
-           "autenticación JWT."], INDIGO, .2)
-    pillar("data", "DATOS", "Data", "& BI", ["Análisis y visualización", "con Python, notebooks",
-           "y aprendizaje automático."], CYAN, .35)
-    pillar("web", "WEB", "Web", "estática", ["Sitios rápidos y modulares", "con Astro, Tailwind CSS",
-           "y Docker."], EMERALD, .5)
-    section_title("title-stack", "Stack", CYAN)
+    pillar("data", "CIENCIA DE DATOS", "Datos", "ciencia y análisis", ["Análisis, visualización y aprendizaje automático",
+           "con Python, Pandas y notebooks."], CORAL, .2)
+    pillar("dev", "SOFTWARE", "Desarrollo", "backend y web", ["APIs con FastAPI y Laravel, sitios con Astro",
+           "y entornos con Docker."], CRIMSON, .35)
+    section_title("title-stack", "Stack", CORAL)
     stack()
 
     token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")

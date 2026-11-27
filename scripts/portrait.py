@@ -28,6 +28,8 @@ def main(source):
             # los rojos (sable, traje) pesan poco en luminancia: se refuerzan
             level = max(lum, r / 255 * 0.75)
             char = RAMP[min(int(level ** 1.05 * len(RAMP)), len(RAMP) - 1)]
+            if max(g, b) > r:  # sin azules: los tonos fríos pasan a gris
+                r = g = b = int(lum * 255)
             peak = max(r, g, b, 1)
             gain = min(255 / peak, 1.7)
             color = "#" + "".join(

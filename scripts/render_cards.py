@@ -108,12 +108,14 @@ def hero():
     b = (f'<image x="4" y="4" width="872" height="353" preserveAspectRatio="xMidYMid slice" '
          f'href="data:image/jpeg;base64,{data}"/>')
     end = 'text-anchor="end"'
-    thin = f'font-weight="300" letter-spacing="7" {end}'
-    b += text(848, 44, "INGENIERÍA INFORMÁTICA · USM", 11, "#e6dcf5", "m shadow", f'letter-spacing="1.2" {end}')
-    b += text(855, 94, "LUKAS", 40, "#ffffff", "s shadow", thin)
-    b += text(855, 138, "GARRIDO", 40, "#ffffff", "s shadow", thin)
-    b += text(848, 168, "Ciencia de datos y desarrollo", 14, "#e6dcf5", "s shadow", end)
-    b += text(848, 188, "Concepción, Chile", 12, "#c3b5da", "s shadow", end)
+    heavy = f'font-weight="800" letter-spacing="-2" {end}'
+    b += (f'<linearGradient id="name" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="{MAGENTA}"/>'
+          '<stop offset="1" stop-color="#c4a8ff"/></linearGradient>')
+    b += text(848, 40, "INGENIERÍA INFORMÁTICA · USM", 11, "#e6dcf5", "m shadow", f'letter-spacing="1.2" {end}')
+    b += text(848, 104, "Lukas", 68, "#ffffff", "s shadow", heavy)
+    b += text(848, 168, "Garrido", 68, "url(#name)", "s shadow", heavy)
+    b += text(848, 196, "Ciencia de datos y desarrollo", 14, "#e6dcf5", "s shadow", end)
+    b += text(848, 216, "Concepción, Chile", 12, "#c3b5da", "s shadow", end)
     save("hero", 880, 361,
          "Lukas Garrido, estudiante de Ingeniería Informática. Ciencia de datos y desarrollo.", b, texture=False)
 

@@ -26,12 +26,20 @@ SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Helvetica,Arial
 MONO = "ui-monospace,'JetBrains Mono',SFMono-Regular,Consolas,Menlo,monospace"
 MONTHS = "Ene Feb Mar Abr May Jun Jul Ago Sep Oct Nov Dic".split()
 
-# Solo hay un parpadeo en bucle: todo el contenido se ve aunque la animación no se ejecute.
+# La portada se "genera" al cargar. El nombre no se anima y la foto tenue queda visible desde el
+# principio, para que la tarjeta nunca aparezca vacía si las animaciones no llegan a ejecutarse.
 STYLE = f"""
 .s{{font-family:{SANS}}} .m{{font-family:{MONO}}}
 .shadow{{paint-order:stroke;stroke:#000;stroke-opacity:.35;stroke-width:3px}}
 .flicker{{animation:flicker 5s linear infinite}}
 @keyframes flicker{{0%,90%,94%,100%{{opacity:1}}92%{{opacity:.3}}96%{{opacity:.6}}}}
+.build{{animation:build .45s ease-out both}}
+.reveal{{animation:reveal 3.2s linear both}}
+.beam{{opacity:0;animation:beam 2.9s linear .1s}}
+@keyframes build{{from{{opacity:0}}to{{opacity:1}}}}
+@keyframes reveal{{from{{opacity:.12}}to{{opacity:.42}}}}
+@keyframes beam{{0%,92%{{opacity:1}}100%{{opacity:0}}}}
+@keyframes sweep{{from{{transform:translateY(0)}}to{{transform:translateY(420px)}}}}
 @media (prefers-reduced-motion:reduce){{*{{animation:none!important}}}}
 """
 
@@ -105,14 +113,19 @@ def hero():
     # Imagen tenue de base (incrustada: GitHub no deja que un SVG cargue imágenes externas)
     # y encima la misma escena dibujada con caracteres.
     data = base64.b64encode(COVER.read_bytes()).decode()
-    b = (f'<image x="4" y="4" width="872" height="420" opacity=".42" '
+    b = (f'<image class="reveal" x="4" y="4" width="872" height="420" opacity=".42" '
          f'href="data:image/jpeg;base64,{data}"/>')
     rows = json.loads((ROOT / "data" / "portrait.json").read_text(encoding="utf-8"))
     line = 420 / len(rows)
     for i, runs in enumerate(rows):
         spans = "".join(f'<tspan fill="{c}">{escape(t)}</tspan>' for c, t in runs)
-        b += (f'<text x="4" y="{4 + (i + .85) * line:.1f}" class="m" font-size="8.4" font-weight="700" '
+        b += (f'<text x="4" y="{4 + (i + .85) * line:.1f}" class="m build" '
+              f'style="animation-delay:{.1 + i * .05:.2f}s" font-size="8.4" font-weight="700" '
               f'xml:space="preserve" textLength="872" lengthAdjust="spacingAndGlyphs">{spans}</text>')
+    # haz que baja junto a las filas que van apareciendo
+    b += ('<g class="beam"><g style="animation:sweep 2.75s linear .1s both">'
+          f'<rect x="4" y="-14" width="872" height="18" fill="{AMBER}" opacity=".12"/>'
+          f'<rect x="4" y="3" width="872" height="2" fill="{AMBER}" opacity=".85"/></g></g>')
     # sombra suave bajo el texto, sobre el suelo, lejos de la figura y el vehículo
     b += (f'<radialGradient id="shade"><stop offset=".35" stop-color="{BG}" stop-opacity=".9"/>'
           f'<stop offset="1" stop-color="{BG}" stop-opacity="0"/></radialGradient>'

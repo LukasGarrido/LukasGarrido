@@ -1,4 +1,4 @@
-<!-- Las tarjetas son SVG animados generados por scripts/render_cards.py y actualizados a diario
+<!-- Las tarjetas son SVG generados por scripts/render_cards.py y actualizados a diario
      por .github/workflows/update-profile-cards.yml. Mantén las tarjetas de una misma fila en una
      sola línea y sin espacios entre ellas. -->
 <div align="center">

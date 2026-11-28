@@ -7,6 +7,7 @@ Sin token se omiten las tarjetas de contribuciones (se conservan las que ya exis
 import datetime as dt
 import json
 import os
+import random
 import urllib.request
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -37,6 +38,16 @@ STYLE = f"""
 @keyframes nudge{{50%{{transform:translateX(5px)}}}}
 @keyframes grow{{from{{transform:scaleY(0)}}to{{transform:none}}}}
 @keyframes sheen{{0%,55%{{transform:translateX(-500px)}}100%{{transform:translateX(1100px)}}}}
+.twinkle{{animation:twinkle 3.5s ease-in-out infinite}}
+.ignite{{animation:ignite .7s cubic-bezier(.2,.8,.2,1) both;transform-box:fill-box;transform-origin:left}}
+.hum{{animation:hum 2.4s ease-in-out infinite}}
+.fly{{animation:fly 14s linear infinite}}
+.hover{{animation:hover 5s ease-in-out infinite}}
+@keyframes twinkle{{50%{{opacity:.1}}}}
+@keyframes ignite{{from{{transform:scaleX(0)}}to{{transform:none}}}}
+@keyframes hum{{50%{{opacity:.55}}}}
+@keyframes fly{{0%{{transform:none}}45%,100%{{transform:translate(1040px,26px)}}}}
+@keyframes hover{{50%{{transform:translateY(-6px)}}}}
 @media (prefers-reduced-motion:reduce){{*{{animation:none!important}}.sheen{{display:none}}}}
 """
 
@@ -50,6 +61,54 @@ def anim(cls, delay, body):
     return f'<g class="{cls}" style="animation-delay:{delay:.2f}s">{body}</g>'
 
 
+def stars(seed, width, height):
+    """Campo de estrellas; la semilla es el nombre de la tarjeta para que no cambie cada día."""
+    rng = random.Random(seed)
+    out = ""
+    for i in range(int(width * height) // 2600):
+        x, y = rng.uniform(8, width - 8), rng.uniform(8, height - 8)
+        r, opacity = rng.choice([.6, .6, .8, 1.1]), rng.uniform(.18, .6)
+        star = f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="#fff" opacity="{opacity:.2f}"/>'
+        out += anim("twinkle", rng.uniform(0, 3.5), star) if i % 5 == 0 else star
+    return out
+
+
+def saber(x, y, length, delay=.6):
+    """Sable de luz que se enciende: empuñadura, resplandor y núcleo."""
+    hilt = (f'<rect x="{x}" y="{y - 4}" width="30" height="8" rx="2" fill="#71717a"/>'
+            f'<rect x="{x + 5}" y="{y - 4}" width="3" height="8" fill="#27272a"/>'
+            f'<rect x="{x + 11}" y="{y - 4}" width="3" height="8" fill="#27272a"/>'
+            f'<rect x="{x + 27}" y="{y - 6}" width="4" height="12" rx="1" fill="#d4d4d8"/>'
+            f'<circle cx="{x + 20}" cy="{y}" r="1.8" fill="{RED}"/>')
+    start = x + 32
+    halo = (f'<rect x="{start}" y="{y - 7}" width="{length}" height="14" rx="7" fill="{RED}" opacity=".16"/>'
+            f'<rect x="{start}" y="{y - 4.5}" width="{length}" height="9" rx="4.5" fill="{RED}" opacity=".4"/>')
+    core = (f'<rect x="{start}" y="{y - 2.5}" width="{length}" height="5" rx="2.5" fill="{RED}"/>'
+            f'<rect x="{start}" y="{y - 1}" width="{length - 3}" height="2" rx="1" fill="#fff"/>')
+    return hilt + anim("ignite", delay, f'<g class="hum">{halo}</g>{core}')
+
+
+def tie_fighter(color):
+    """Silueta de caza TIE centrada en (0, 0), de unos 60x52."""
+    wing = "M-4-26H4L8-14V14L4 26H-4L-8 14V-14Z"
+    return (f'<g fill="{color}"><path transform="translate(-24 0)" d="{wing}" opacity=".75"/>'
+            f'<path transform="translate(24 0)" d="{wing}" opacity=".75"/>'
+            '<rect x="-20" y="-2.5" width="40" height="5"/><circle r="11"/></g>'
+            f'<circle r="5.5" fill="{BG}"/><path d="M-5.5 0H5.5M0-5.5V5.5" stroke="{color}" stroke-width="1"/>')
+
+
+def death_star(cx, cy, r, opacity):
+    lines = "".join(
+        f'<path d="M{cx - r * w:.1f} {cy + r * h:.1f}H{cx + r * w:.1f}"/>'
+        for h, w in [(-.66, .6), (-.4, .85), (.3, .9), (.52, .78), (.74, .55)])
+    dish_x, dish_y = cx - r * .38, cy - r * .42
+    return (f'<g opacity="{opacity}" fill="none" stroke="#fff" stroke-width="1.2">'
+            f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="#fff" fill-opacity=".12"/>{lines}'
+            f'<path d="M{cx - r} {cy}H{cx + r}" stroke-width="3.5"/>'
+            f'<circle cx="{dish_x:.1f}" cy="{dish_y:.1f}" r="{r * .27:.1f}" fill="{BG}"/>'
+            f'<circle cx="{dish_x:.1f}" cy="{dish_y:.1f}" r="{r * .07:.1f}"/></g>')
+
+
 def save(name, width, height, title, body, fill=BG):
     """Tarjeta con margen transparente de 4px para que se puedan juntar en el README."""
     w, h = width - 8, height - 8
@@ -58,7 +117,7 @@ def save(name, width, height, title, body, fill=BG):
         f'viewBox="0 0 {width} {height}" role="img" aria-label="{escape(title)}">'
         f"<title>{escape(title)}</title><style>{STYLE}</style>"
         f'<defs><clipPath id="c"><rect x="4" y="4" width="{w}" height="{h}" rx="14"/></clipPath></defs>'
-        f'<g clip-path="url(#c)"><rect x="4" y="4" width="{w}" height="{h}" fill="{fill}"/>{body}</g>'
+        f'<g clip-path="url(#c)"><rect x="4" y="4" width="{w}" height="{h}" fill="{fill}"/>{stars(name, width, height)}{body}</g>'
         f'<rect x="4.5" y="4.5" width="{w - 1}" height="{h - 1}" rx="13.5" fill="none" stroke="{BORDER}"/>'
         "</svg>"
     )
@@ -86,9 +145,10 @@ def hero():
     heavy = 'font-weight="800" letter-spacing="-3"'
     b += anim("rise", .2, text(36, 164, "Lukas", 92, TEXT, "s", heavy))
     b += anim("rise", .32, text(36, 254, "Garrido", 92, "url(#name)", "s", heavy))
+    b += saber(40, 274, 300, 1.0)
     b += anim("rise", .5,
-              text(40, 300, "Ciencia de datos y desarrollo de software.", 18, "#d4d4d8")
-              + text(40, 326, "Los Ángeles – Concepción, Chile", 15, DIM))
+              text(40, 306, "Ciencia de datos y desarrollo de software.", 18, "#d4d4d8")
+              + text(40, 332, "Los Ángeles – Concepción, Chile", 15, DIM))
     b += anim("fade", .8,
               text(40, 376, "lukasgarrido-portfolio.vercel.app", 13, TEXT, "m")
               + f'<g class="nudge">{text(310, 376, "→", 15, CORAL, "m")}</g>')
@@ -102,6 +162,7 @@ def hero():
                   f'<text x="{x}" y="{y + i * line:.1f}" class="m" font-size="7.9" font-weight="700" '
                   f'xml:space="preserve" textLength="{width}" lengthAdjust="spacingAndGlyphs" '
                   f'data-cols="{cols}">{spans}</text>')
+    b += f'<g class="fly"><g transform="translate(-70 32) scale(.6)">{tie_fighter("#a1a1aa")}</g></g>'
     save("hero", 880, 408,
          "Lukas Garrido, estudiante de Ingeniería Informática. Ciencia de datos y desarrollo.", b)
 
@@ -111,6 +172,11 @@ def pillar(name, x_label, big, unit, lines, color, delay):
     b = glow("g", 390, 190, 220, color, .35)
     b += f'<rect x="4" y="4" width="432" height="3" fill="{color}"/>'
     b += (f'<g class="sheen"><path d="M0 0H60L-10 212H-70Z" fill="#fff" opacity=".05"/></g>')
+    if name == "data":
+        b += death_star(368, 130, 62, .22)
+    else:
+        b += (f'<g class="hover" opacity=".3"><g transform="translate(368 150) scale(1.5)">'
+              f'{tie_fighter("#d4d4d8")}</g></g>')
     b += text(24, 40, x_label, 12, color, "m", 'letter-spacing="1.4"')
     b += f'<g class="nudge">{text(398, 40, "→", 15, color, "m")}</g>'
     b += anim("rise", delay,
@@ -124,6 +190,7 @@ def pillar(name, x_label, big, unit, lines, color, delay):
 def section_title(name, label, color):
     b = (f'<rect class="pulse" x="26" y="27" width="9" height="9" fill="{color}"/>'
          + anim("rise", .1, text(48, 39, label, 22, TEXT, "s", 'font-weight="700"')))
+    b += saber(150, 32, 650)
     save(name, 880, 64, label, b)
 
 
@@ -222,7 +289,7 @@ def activity(calendar):
         b += text(x + 17, f"{170 - h:.1f}", value, 11, MUTED, "m", 'text-anchor="middle"')
         b += text(x + 17, 202, MONTHS[int(key[5:]) - 1], 11, DIM, "m", 'text-anchor="middle"')
     b = (f'<linearGradient id="bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{CORAL}"/>'
-         f'<stop offset="1" stop-color="{CRIMSON}"/></linearGradient>') + b
+         f'<stop offset="1" stop-color="{CRIMSON}"/></linearGradient>') + death_star(430, 82, 66, .13) + b
     save("activity", 880, 224,
          f"Actividad mensual: {active} días activos, racha máxima de {longest} días", b)
 

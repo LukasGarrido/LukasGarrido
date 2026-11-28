@@ -3,7 +3,7 @@
     GH_TOKEN=... python scripts/render_cards.py
 
 Sin token se omiten las tarjetas de contribuciones (se conservan las que ya existan).
-Estética de Blade Runner 2049: un fotograma en la portada y rótulos de neón en el resto.
+Estética de Blade Runner 2049: portada en arte ASCII (ver portrait.py) y rótulos de neón en el resto.
 """
 import base64
 import datetime as dt
@@ -15,7 +15,7 @@ from xml.sax.saxutils import escape
 
 ROOT = Path(__file__).resolve().parent.parent
 CARDS = ROOT / "cards"
-HERO_STILL = ROOT / "assets" / "br2049" / "joi.jpg"
+COVER = ROOT / "assets" / "br2049" / "cover.jpg"
 USER = "LukasGarrido"
 
 BG, SURFACE, BORDER = "#0a0b0e", "#111318", "#262a33"
@@ -102,21 +102,29 @@ def save(name, width, height, title, body, fill=BG, texture=True):
 
 
 def hero():
-    # El fotograma va incrustado (GitHub no deja que un SVG cargue imágenes externas) y sin filtros;
-    # el texto ocupa la zona oscura de la derecha, sin tapar a los personajes.
-    data = base64.b64encode(HERO_STILL.read_bytes()).decode()
-    b = (f'<image x="4" y="4" width="872" height="353" preserveAspectRatio="xMidYMid slice" '
+    # Imagen tenue de base (incrustada: GitHub no deja que un SVG cargue imágenes externas)
+    # y encima la misma escena dibujada con caracteres.
+    data = base64.b64encode(COVER.read_bytes()).decode()
+    b = (f'<image x="4" y="4" width="872" height="420" opacity=".42" '
          f'href="data:image/jpeg;base64,{data}"/>')
-    end = 'text-anchor="end"'
-    heavy = f'font-weight="800" letter-spacing="-2" {end}'
-    b += (f'<linearGradient id="name" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="{MAGENTA}"/>'
-          '<stop offset="1" stop-color="#c4a8ff"/></linearGradient>')
-    b += text(848, 40, "INGENIERÍA INFORMÁTICA · USM", 11, "#e6dcf5", "m shadow", f'letter-spacing="1.2" {end}')
-    b += text(848, 104, "Lukas", 68, "#ffffff", "s shadow", heavy)
-    b += text(848, 168, "Garrido", 68, "url(#name)", "s shadow", heavy)
-    b += text(848, 196, "Ciencia de datos y desarrollo", 14, "#e6dcf5", "s shadow", end)
-    b += text(848, 216, "Concepción, Chile", 12, "#c3b5da", "s shadow", end)
-    save("hero", 880, 361,
+    rows = json.loads((ROOT / "data" / "portrait.json").read_text(encoding="utf-8"))
+    line = 420 / len(rows)
+    for i, runs in enumerate(rows):
+        spans = "".join(f'<tspan fill="{c}">{escape(t)}</tspan>' for c, t in runs)
+        b += (f'<text x="4" y="{4 + (i + .85) * line:.1f}" class="m" font-size="8.4" font-weight="700" '
+              f'xml:space="preserve" textLength="872" lengthAdjust="spacingAndGlyphs">{spans}</text>')
+    # sombra suave bajo el texto, sobre el suelo, lejos de la figura y el vehículo
+    b += (f'<radialGradient id="shade"><stop offset=".35" stop-color="{BG}" stop-opacity=".9"/>'
+          f'<stop offset="1" stop-color="{BG}" stop-opacity="0"/></radialGradient>'
+          '<ellipse cx="170" cy="340" rx="340" ry="165" fill="url(#shade)"/>')
+    heavy = 'font-weight="800" letter-spacing="-2"'
+    b += (f'<linearGradient id="name" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="{ORANGE}"/>'
+          f'<stop offset="1" stop-color="{AMBER}"/></linearGradient>')
+    b += text(40, 250, "INGENIERÍA INFORMÁTICA · USM", 11, "#f6dcc0", "m shadow", 'letter-spacing="1.2"')
+    b += text(36, 312, "Lukas", 68, "#ffffff", "s shadow", heavy)
+    b += text(36, 372, "Garrido", 68, "url(#name)", "s shadow", heavy)
+    b += text(40, 399, "Ciencia de datos y desarrollo · Concepción, Chile", 13, "#f6dcc0", "s shadow")
+    save("hero", 880, 428,
          "Lukas Garrido, estudiante de Ingeniería Informática. Ciencia de datos y desarrollo.", b, texture=False)
 
 
